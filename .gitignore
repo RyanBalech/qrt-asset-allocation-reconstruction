@@ -1,0 +1,16 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+*.csv
+*.parquet
+*.npz
+*.npy
+*.joblib
+*.cbm
+*.log
+public_market_data/
+data/
+artifacts/
+research/v5_raw_features_*.json
+research/v5_pool_manifest.json

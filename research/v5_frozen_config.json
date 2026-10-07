@@ -1,0 +1,15 @@
+{
+  "models": ["adaptive_full_d5", "adaptive_full_d6"],
+  "adaptive_weights": true,
+  "alpha": 0.7,
+  "radius": 260,
+  "tau": 100,
+  "adaptive_steps": 2,
+  "adaptive_power": 0.5,
+  "base_blend": 0.0,
+  "stock_universes": {"1": "v5_stock_prices_g1.parquet", "2": "v5_stock_prices_g2.parquet", "3": "v4_stock_prices_expanded_g3.parquet", "4": "v5_stock_prices_g4.parquet"},
+  "model_training": {"depth5_iterations": 650, "depth6_iterations": 900, "learning_rate": 0.035, "l2_leaf_reg": 15, "random_seed": 20260921},
+  "reserved_validation_offsets": [0, 7, 14],
+  "development_offsets": [3, 10, 17],
+  "selection_note": "Settings frozen before scoring reserved offsets. Public stock relevance weighting improved all three old random development pools; retain the original Korean universe. Average the depth-5 and depth-6 correction classifiers with equal weight."
+}

@@ -1,0 +1,16 @@
+{
+  "rows": 47192,
+  "dates": 180,
+  "v5_accuracy": 0.7621206984234616,
+  "v4_accuracy": 0.7455712832683505,
+  "accuracy_date_bootstrap_95": [
+    0.750803345276816,
+    0.7738562652556692
+  ],
+  "improvement_date_bootstrap_95": [
+    0.011704531724915365,
+    0.021984538633753742
+  ],
+  "public_score": null,
+  "note": "Offsets 0,7,14 excluded from correction-model fitting and current-turn development selection. Historical reconstruction using public target-day stock returns; not prospective forecasting. Earlier v4 development and inherited CatBoost OOF priors mean this is not a completely nested, historically untouched evaluation."
+}

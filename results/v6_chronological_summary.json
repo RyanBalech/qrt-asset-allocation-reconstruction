@@ -1,0 +1,19 @@
+{
+  "rows": 56180,
+  "dates": 216,
+  "v6_accuracy": 0.7188679245283018,
+  "v5_accuracy": 0.7182805268778925,
+  "gain_percentage_points": 0.05873976504093825,
+  "v6_date_bootstrap_95": [
+    0.7068097930053051,
+    0.7310533203090903
+  ],
+  "gain_date_bootstrap_95": [
+    -0.0016373069480457236,
+    0.0026735304480882253
+  ],
+  "development_gain_percentage_points": 0.24819027921405556,
+  "config_sha256": "a5ee667b5f31dc5026cbf36a6b4b73dba8a9b19781b498f80733bd01fb1e3ea8",
+  "public_score": null,
+  "note": "Frozen before scoring the new correction-model ensemble on 2015. Earlier research and legacy reconstruction probes reused some of these labels; this is a paired chronological check, not a wholly untouched evaluation."
+}
