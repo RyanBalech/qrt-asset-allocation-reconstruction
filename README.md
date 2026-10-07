@@ -1,38 +1,42 @@
-# Reconstructing historical allocation returns | QRT Challenge
+# QRT Asset Allocation — Historical Reconstruction
 
-An independent follow-up to the [QRT Asset Allocation Performance Forecasting challenge](https://challengedata.ens.fr/challenges/167). The challenge asks for the sign of the next-day return of an anonymized allocation, given 20 days of return and signed-volume history. This repository documents my later investigation into what can be recovered when the evaluation set is a historical batch rather than a live stream.
+Independent follow-up research on the [QRT asset-allocation challenge](https://challengedata.ens.fr/challenges/167): recover next-day return direction from overlapping allocation histories, public market calendars and local equity-factor models.
 
-The central observation is that nearby rows contain overlapping return histories. When a later row is available, one of its lagged returns may reveal a queried row's target day. For remaining dates, I align anonymized sessions with public market calendars, estimate allocation returns from public equity returns using local ridge regression, and use CatBoost to correct the resulting directional probabilities.
+The key observation is structural: adjacent snapshots share most of their 20-day return histories. A later snapshot can expose an earlier snapshot's target return. I combine this direct evidence with weighted ridge reconstruction and CatBoost probability correction.
 
-**This is historical reconstruction, not a prospective trading model.** It uses later rows from the supplied batch and public prices on the historical target dates. Neither source would be available when making a live next-day decision. The distinction is central to interpreting the result.
+**Scope:** historical batch reconstruction. The method uses later snapshots and public prices on historical target dates; these inputs are unavailable for a live next-day forecast.
 
 ## Results
 
-| Evaluation | Accuracy | Scope |
-| --- | ---: | --- |
-| v4 reference | 74.56% | Same 47,192 reserved rows as v5 |
-| v5 reconstruction | **76.21%** | 47,192 rows across 180 reserved dates |
-| v5 public leaderboard | **77.41%** | Participant-reported score for the submitted CSV; not independently verified here |
+| Reserved-date evaluation | Accuracy |
+| --- | ---: |
+| v4 reference | 74.56% |
+| v5 adaptive reconstruction | **76.21%** |
 
-The v5 minus v4 paired difference on the reserved dates is **+1.65 percentage points**. A date-level bootstrap interval for that difference is **+1.17 to +2.20 points**. These reserved dates were excluded from fitting the v5 correction models and from the current selection of settings. Earlier research inspected some of the same labels, and the inherited CatBoost prior was not trained in a fully nested evaluation. The interval therefore describes this comparison; it is not a claim of untouched out-of-sample trading performance. See [evaluation notes](docs/evaluation.md).
+Both methods are evaluated on **47,192 rows across 180 dates**. The paired gain is **1.65 percentage points**, with a date-bootstrap 95% interval of **[1.17, 2.20] points**. The v5 submission recorded a **77.41% public leaderboard score**.
 
-I also tried a later v6 correction model. Its chronological check improved over v5 by only **0.06 percentage points** on 56,180 rows, with an interval spanning zero. I kept v5 as the presented submission because the extra complexity was not supported by that comparison.
+[Evaluation notes](docs/evaluation.md) document the submission hash, leaderboard provenance, split construction and earlier development exposure. The reserved comparison is not a fully nested evaluation. A later v6 chronological comparison did not establish a reliable improvement, so v5 remains the presented method.
 
-## How the method works
+## Method
 
-1. **Recover session order.** Compare overlapping 20-day histories across allocations, then constrain candidate dates using market calendars and public index/stock moves.
-2. **Use direct overlap when available.** A later snapshot can contain the return of an earlier snapshot's target day. This path is tracked separately from statistical reconstruction.
-3. **Estimate missing returns.** Fit local, weighted ridge regressions from public equity returns to observed allocation histories. The queried target day is removed from each local fit; adaptive equity weights share information across allocations.
-4. **Correct the sign.** Build features from direct returns, reconstructed returns, historical volatility, turnover, overlap quality and a CatBoost prior. Average two CatBoost correction models trained on disjoint date pools.
+1. **Session alignment:** cross-allocation cosine matching of overlapping histories, constrained by exchange calendars and public market moves.
+2. **Direct reconstruction:** identify later snapshots containing a query's target return and track coverage separately.
+3. **Equity-factor reconstruction:** local weighted ridge fits, excluding the query's target day from every fit; adaptive factor weights share information across allocations.
+4. **Directional correction:** combine reconstruction, volatility, turnover, overlap quality and a CatBoost prior; average corrections fitted on disjoint date pools.
 
-The research implementation is under [`research/`](research). [`v5_pipeline.py`](research/v5_pipeline.py) builds the validation and inference features; [`v5_adaptive_ridge.py`](research/v5_adaptive_ridge.py) implements the adaptive regression; [`v5_finalize.py`](research/v5_finalize.py) refits the frozen models and writes the submission. The frozen settings are in [`v5_frozen_config.json`](research/v5_frozen_config.json).
+The [frozen configuration](research/v5_frozen_config.json), [pipeline](research/v5_pipeline.py), [adaptive regression](research/v5_adaptive_ridge.py) and [submission finalization](research/v5_finalize.py) expose the experimental choices rather than hiding them behind a notebook.
 
-## Reproduction and data
+## Run the checks
 
-The source code, frozen configuration and aggregate evaluation are public. The challenge CSVs, cached public quotes, intermediate arrays and fitted models are deliberately excluded. The v5 scripts are the original artifact-dependent research pipeline, not a one-command clean-room reproduction. They run after the intermediate files listed in [reproduction notes](docs/reproduction.md) have been prepared. This keeps the repository honest about what a reviewer can run from a fresh clone.
+```bash
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
+```
 
-Challenge participants can obtain the original CSVs from the [challenge page](https://challengedata.ens.fr/challenges/167), subject to its dataset terms. No challenge row, submission label, model checkpoint or scraped market-data cache is included here. `QRT_TEST_CSV` points to the participant's local test CSV for the final integrity check.
+The synthetic tests check target-day exclusion in both ridge implementations, direct-overlap behavior, calendar boundaries and feature-cache invalidation. They require no challenge data.
 
-## Context and credit
+Full experiments require challenge CSVs, public-price caches, intermediate arrays and fitted priors. These are excluded from Git. Follow the [reproduction guide](docs/reproduction.md) for the required inputs and execution order; the original research pipeline is artifact-dependent.
 
-The initial ENS Data Camp project was carried out with Omar Karim, Hitaishi Dhoowooah, Gabriel Dreik and Korouhanba Khuman Laikhuram. This later reconstruction study and its v5 research code are my follow-up work. QRT provided the challenge; this repository is an independent participant project and is not affiliated with or endorsed by QRT.
+## Research context
+
+The initial ENS Data Camp project was completed with Omar Karim, Hitaishi Dhoowooah, Gabriel Dreik and Korouhanba Khuman Laikhuram. This reconstruction study and v5 code are my independent follow-up. QRT provided the challenge; this participant project is not affiliated with QRT.

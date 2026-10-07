@@ -24,3 +24,9 @@ python research/v5_finalize.py
 ```
 
 The final script checks the row order and features against the original test CSV and writes `research/submission_improved_v5.csv`. Its hash should be compared with the value in [evaluation notes](evaluation.md). Running the training and date-alignment stages requires substantial memory and cached public data. The exclusion of those artifacts is intentional; the command sequence is a guide for holders of the original research workspace, not a promise of fresh-clone reproducibility.
+
+## Feature-cache identity
+
+The raw-feature cache records the frozen configuration, inference mode, pool indices and candidate calendar grid. Changing any of these rebuilds the features. Older cache stamps are invalidated automatically. Raw data or code changes still require clearing local caches; cache identity does not substitute for dataset/version tracking.
+
+The calendar-boundary and cache fixes are covered by synthetic tests. Committed historical evaluation artifacts have not been recomputed by these maintenance changes.
